@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('birthdate');
             $table->string('location');
             $table->longText('biography');
-            $table->foreign('id_user')->references('id_user')->on('user')->onDelete('cascade');;
+            $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');
         });
     }
 
@@ -28,10 +28,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('account_details');
+        Schema::dropIfExists('users');
         Schema::dropIfExists('jobs');
         Schema::dropIfExists('job_batches');
         Schema::dropIfExists('failed_jobs');
-        Schema::dropIfExists('user');
-        Schema::dropIfExists('account_details');
     }
 };

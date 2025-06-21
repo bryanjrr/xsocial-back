@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_user');
             $table->string('full_name');
-            $table->integer('phone');
-            $table->date('birthdate');
-            $table->string('location');
-            $table->longText('biography');
+            $table->integer('phone')->nullable();
+            $table->date('birthdate')->nullable();
+            $table->string('location')->nullable();
+            $table->longText('biography')->nullable();
             $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 

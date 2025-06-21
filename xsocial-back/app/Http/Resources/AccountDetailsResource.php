@@ -20,7 +20,7 @@ class AccountDetailsResource extends JsonResource
             'birthdate' => $this->birthdate,
             'location' => $this->location,
             'biography' => $this->biography,
-            'user_id' => $this->user_id,
+            'id_user' => $this->user_id,
         ];
     }
 }

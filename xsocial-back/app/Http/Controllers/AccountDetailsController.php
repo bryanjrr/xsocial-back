@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Account_details;
 use Illuminate\Http\Request;
 
 class AccountDetailsController extends Controller
@@ -19,7 +20,7 @@ class AccountDetailsController extends Controller
      */
     public function create()
     {
-        //
+        
     }
 
     /**

@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('username');
             $table->string('email');
             $table->binary('password', length: 255);
-            $table->date('union_date');
             $table->binary('photo')->nullable();
             $table->timestamps();
         });

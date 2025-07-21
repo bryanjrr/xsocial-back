@@ -8,17 +8,38 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
-
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function getUserByToken(Request $request)
     {
-        //
+        try {
+            $user = PersonalAccessToken::findToken($request->bearerToken())?->tokenable;
+            if (!$user) {
+                return response()->json([
+                    'status' => "error",
+                    'message' => "User not found"
+                ], 404);
+            } else {
+                return response()->json([
+                    'status' => "success",
+                    'user' => $user,
+                    'account_details' => $user->account_details
+                ], 200);
+            }
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => "error",
+                'message' => "Internal server error",
+                "details" => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -30,10 +51,12 @@ class UserController extends Controller
         try {
             $user = User::where(['email' => $request->email])->first();;
             if ($user && Hash::check($request->password, $user->password)) {
+                $user->tokens()->delete();
                 $token = $user->createToken($user->username)->plainTextToken;
+
                 return response()->json([
-                    'token' => $token,
                     'status' => "success",
+                    'token' => $token,
                     'message' => "You have logged in successfully."
                 ], 200);
             } else {
@@ -67,21 +90,22 @@ class UserController extends Controller
                     'status' => 'error',
                     'message' => $validator->errors()->first()
                 ], 422);
+            } else {
+                $avatarUrl = "https://api.dicebear.com/7.x/thumbs/svg?seed=$request->username";
+
+                $user = User::create([
+                    'username' => $request->username,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'photo' => $avatarUrl,
+                ]);
+
+                $user->account_details()->create([
+                    'id_user' => $user->id_user,
+                    'full_name' => $request->name . " " . $request->surname,
+                    'union_date' => Carbon::now(),
+                ]);
             }
-
-            $user = User::create([
-                'username' => $request->username,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'union_date' => now(),
-                'photo' => null,
-            ]);
-
-            Account_details::create([
-                'id_user' => $user->id_user,
-                'full_name' => $request->name . " " . $request->surname,
-            ]);
-
             return response()->json([
                 'user' => $user,
                 'status' => "success",
@@ -107,11 +131,7 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
-
+   
     /**
      * Show the form for editing the specified resource.
      */

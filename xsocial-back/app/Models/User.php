@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Account_details;
 
 class User extends Authenticable
 {
@@ -28,9 +29,28 @@ class User extends Authenticable
         'name',
         'surname',
         'password',
-        'union_date',
         'photo'
     ];
+
+    public function account_details()
+    {
+        return $this->hasOne(Account_details::class, 'id_user');
+    }
+
+    public function followingUsers()
+    {
+        return $this->belongsToMany(User::class, 'user_followers', 'id_follower', 'id_followed')->withTimestamps();
+    }
+
+    public function followersUser()
+    {
+        return $this->belongsToMany(User::class, 'user_followers', 'id_followed', 'id_follower')->withTimestamps();
+    }
+
+    public function post()
+    {
+        return $this->morphMany(Post::class, 'posteable');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -54,6 +74,8 @@ class User extends Authenticable
             'password' => 'hashed',
         ];
     }
+
+
 
     /* Relacion con Account_Details */
 }

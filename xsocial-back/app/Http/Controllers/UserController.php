@@ -53,7 +53,6 @@ class UserController extends Controller
             if ($user && Hash::check($request->password, $user->password)) {
                 $user->tokens()->delete();
                 $token = $user->createToken($user->username)->plainTextToken;
-
                 return response()->json([
                     'status' => "success",
                     'token' => $token,
@@ -131,7 +130,7 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-   
+
     /**
      * Show the form for editing the specified resource.
      */

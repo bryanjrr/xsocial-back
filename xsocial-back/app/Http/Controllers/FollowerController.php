@@ -43,15 +43,42 @@ class FollowerController extends Controller
     {
         try {
             $authUser = PersonalAccessToken::findToken($request->bearerToken())?->tokenable;
-            $authUser->followingUsers()->detach($request->id_followed);
+            $authUser->followingUsers()->detach($request->input('id_user'));
             return response()->json([
                 'status' => "success",
+                "user" => $request->input('id_user')
             ], 200);
         } catch (Exception $e) {
             return response()->json([
                 'status' => "error",
                 'message' => "Internal server error",
                 "details" => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function followUser(Request $request)
+    {
+        try {
+            $authUser = PersonalAccessToken::findToken($request->bearerToken())?->tokenable;
+            $isAlreadyFollowing = $authUser->followingUsers()
+                ->where('id_followed', $request->id_user)
+                ->exists();
+
+            if (!$isAlreadyFollowing) {
+                $authUser->followingUsers()->attach($request->id_user);
+            }
+            $followedUser = User::find($request->id_user);
+            return response()->json([
+                'status' => "success",
+                'message' => "You’re now following " . ($followedUser ? $request->username : ''),
+                "request" => $request->all(),
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => "error",
+                'message' => "Internal server error",
+                "details" => $e->getMessage(),
             ], 500);
         }
     }

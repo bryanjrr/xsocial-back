@@ -16,7 +16,12 @@ class PostController extends Controller
                 'content' => 'required|string|max:280',
             ]);
             $user = PersonalAccessToken::findToken($request->bearerToken())?->tokenable;
-            $user->post()->create(['content' => $request->content]);
+            $post = $user->post()->create(['content' => $request->content]);
+            if ($request->gif) {
+                $post->media_post()->create([
+                    'file_url' => $request->gif
+                ]);
+            }
         } catch (Exception $e) {
             return response()->json([
                 'status' => "error",

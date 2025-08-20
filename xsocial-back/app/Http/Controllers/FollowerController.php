@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account_details;
+use App\Models\AccountDetail;
 use Exception;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -22,6 +22,7 @@ class FollowerController extends Controller
                     ->withExists(['followersUser as is_following' => function ($query) use ($authUser) {
                         $query->where('id_follower', $authUser->id_user);
                     }])
+                    ->limit(5)
                     ->whereNot('id_user', $authUser->id_user)
                     ->get();
             } else {
@@ -30,6 +31,7 @@ class FollowerController extends Controller
                         $query->where('id_follower', $authUser->id_user);
                     }])
                     ->whereNot('id_user', $authUser->id_user)
+                    ->limit(5)
                     ->get();
             }
 

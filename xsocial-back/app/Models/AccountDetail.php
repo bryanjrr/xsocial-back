@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-
-class Account_details extends Model
+class AccountDetail extends Model
 {
-
+    use HasFactory;
     protected $primaryKey = 'id';
 
+    protected $table = 'account_details';
     protected $fillable = [
         'id_user',
         'full_name',

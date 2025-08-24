@@ -20,9 +20,8 @@ class Post extends Model
         return $this->morphTo();
     }
 
-
-    public function media_post()
+    public function mediaPosts()
     {
-        return $this->morphMany(Media_post::class, 'media');
+        return $this->hasMany(Media_post::class, 'media_id');
     }
 }

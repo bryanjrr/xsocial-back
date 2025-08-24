@@ -7,6 +7,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
 use App\Models\User;
+use App\Http\Resources\PostResource;
 
 class FeedController extends Controller
 {
@@ -54,12 +55,11 @@ class FeedController extends Controller
         $perPage = $request->query('per_page', 10);
         $after = $request->query('after');
 
-        $followedIds = $authUser->followingUsers()->pluck('followed_id')->toArray();
-        dd($followedIds);
+        $followedIds = $authUser->followingUsers()->pluck('id_followed')->toArray();
 
-        $query = Post::whereIn('user_id', $followedIds)
-            ->with(['user' => function ($query) {
-                $query->select('id', 'username', 'photo');
+        $query = Post::whereIn('posteable_id', $followedIds)
+            ->with(['posteable' => function ($query) {
+                $query->select('id_user', 'username', 'photo');
             }])
             ->orderBy('created_at', 'desc')
             ->orderBy('id', 'desc');
@@ -74,7 +74,7 @@ class FeedController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $posts,
+            'data' => PostResource::collection($posts),
             'pagination' => [
                 'next_cursor' => $nextCursor,
                 'per_page' => $perPage,

@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->text('file_url');
             $table->unsignedBigInteger('media_id');
+            $table->unsignedBigInteger('content_type');
             $table->string("media_type");
             $table->timestamps();
             $table->foreign('media_id')->references('id')->on('posts')->onDelete('cascade');
+            $table->foreign('content_type')->references('id')->on('content_types')->onDelete('cascade');
         });
     }
 

@@ -6,22 +6,30 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PostResource extends JsonResource
 {
+
     public function toArray($request)
     {
-        $imageMimeTypes = ['image', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $imageContentTypes = ['photo'];
 
         return [
             'id' => $this->id,
             'content' => $this->content,
             'created_at' => $this->created_at,
-            'media' => $this->mediaPosts->map(function ($media) use ($imageMimeTypes) {
+            'media_debug' => $this->mediaPosts,
+            'media' => (function () use ($imageContentTypes) {
+                $media = $this->mediaPosts[0] ?? null;
+                if (!$media) return null;
+                $contentTypeName = $media->contentType?->name ?? null;
+                $fileUrl = $media->file_url;
+                if ($contentTypeName && in_array($contentTypeName, $imageContentTypes)) {
+                    $fileUrl = base64_encode($fileUrl);
+                }
                 return [
-                    'file_url' => in_array($media->media_type, $imageMimeTypes)
-                        ? base64_encode($media->file_url)
-                        : $media->file_url,
-                    'media_type' => $media->media_type,
+                    'file_url' => $fileUrl,
+                    'media_type' => $media->media_type ?? null,
+                    'content_type' => $contentTypeName,
                 ];
-            })->toArray(),
+            })(),
             'user' => [
                 'id' => $this->posteable->id_user,
                 'username' => $this->posteable->username,

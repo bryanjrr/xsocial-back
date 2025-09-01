@@ -22,6 +22,6 @@ class Post extends Model
 
     public function mediaPosts()
     {
-        return $this->hasMany(Media_post::class, 'media_id');
+        return $this->morphMany(Media_post::class, 'media');
     }
 }

@@ -8,10 +8,13 @@ use App\Http\Controllers\PostController;
 use App\Http\Middleware\Authenticate;
 use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\FeedController;
+use Illuminate\Support\Facades\Log;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+
 
 Route::post('/register', [UserController::class, 'create']);
 Route::post('/login', [UserController::class, 'login'])->name('login');
-
+Route::get('/test-imagekit', [PostController::class, 'uploadTest']);
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/user', [UserController::class, 'getUserByToken']);
     Route::post('/user/post', [PostController::class, 'makeUserPost']);

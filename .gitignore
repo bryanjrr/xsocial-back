@@ -1,0 +1,17 @@
+# Ignore Composer dependencies
+/vendor/
+/xsocial-back/vendor/
+
+# Ignore Node dependencies
+/node_modules/
+/xsocial-back/node_modules/
+
+# Ignore environment files
+.env
+.env.*
+
+# Ignore IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

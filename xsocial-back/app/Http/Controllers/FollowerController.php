@@ -14,28 +14,42 @@ class FollowerController extends Controller
     {
         try {
             $authUser = PersonalAccessToken::findToken($request->bearerToken())?->tokenable;
-            if ($request->location) {
-                $users = User::with('account_details')
-                    ->whereHas('account_details', function ($query) use ($request) {
-                        $query->where('location', $request->location);
-                    })
-                    ->withExists(['followersUser as is_following' => function ($query) use ($authUser) {
-                        $query->where('id_follower', $authUser->id_user);
-                    }])
-                    ->limit(5)
-                    ->whereNot('id_user', $authUser->id_user)
-                    ->get();
-            } else {
-                $users = User::with('account_details')
-                    ->withExists(['followersUser as is_following' => function ($query) use ($authUser) {
-                        $query->where('id_follower', $authUser->id_user);
-                    }])
-                    ->whereNot('id_user', $authUser->id_user)
-                    ->limit(5)
-                    ->get();
+            $alreadyFollowingIds = $authUser->followingUsers()->pluck('id_followed')->toArray();  // ¡Cambio aquí! 'id_followed' en lugar de 'id_user'
+            if (empty($alreadyFollowingIds)) {
+                $alreadyFollowingIds = [];
             }
 
-            return response()->json($users, 200);
+            $query = User::with('account_details')
+                ->withExists(['followingUsers as is_following' => function ($query) use ($authUser) {  // ¡Cambio aquí! Usa 'followingUsers' y ajusta el where
+                    $query->where('id_follower', $authUser->id_user);  // Verifica si tú sigues al usuario (id_follower = auth, id_followed = el usuario)
+                }])
+                ->whereNot('id_user', $authUser->id_user)
+                ->whereNotIn('id_user', $alreadyFollowingIds);
+
+            /*  if ($request->location) {
+                $query->whereHas('account_details', function ($q) use ($request) {
+                    $q->where('location', $request->location);
+                });
+            } */
+
+            $perPage = $request->input('per_page', 5);
+            $cursor = $request->input('cursor');
+            if ($cursor) {
+                $query->where('id_user', '>', $cursor);
+            }
+            $users = $query->limit($perPage + 1)->get();
+
+            $nextCursor = null;
+            if ($users->count() > $perPage) {
+                $nextCursor = $users[$perPage]->id_user;
+                $users = $users->slice(0, $perPage);
+            }
+
+            return response()->json([
+                'data' => $users->values(),
+                'next_cursor' => $nextCursor,
+                'per_page' => $perPage,
+            ], 200);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
